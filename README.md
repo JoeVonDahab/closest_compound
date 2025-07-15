@@ -4,9 +4,9 @@ A molecular similarity search tool that uses ECFP6 fingerprints and optionally M
 
 ## Features
 
-- **ECFP6 Fingerprints**: Fast similarity search using Extended Connectivity Fingerprints
-- **Mol2Vec Integration**: Optional neural embedding-based similarity (when model provided)
-- **Blended Search**: Combines both methods for improved results
+- **ECFP6 Fingerprints + Tanimoto Similarity**: Fast and accurate molecular similarity using Extended Connectivity Fingerprints with Tanimoto coefficient scoring
+- **Mol2Vec Neural Embeddings**: Optional molecular embeddings for enhanced similarity search
+- **Blended Search**: Combines ECFP6 and Mol2Vec methods for improved results
 - **Multiple Input Formats**: Supports both CSV and SMI file formats
 - **FAISS Backend**: Efficient similarity search using Facebook's FAISS library
 
@@ -28,14 +28,14 @@ uv pip install -e .
 
 ### 1. Build the Index
 
-First, build a similarity index from your molecular library:
+Build a similarity index from your molecular library:
 
 ```bash
 # Using the provided library
-uv run scripts/build_index.py library/library.smi
+uv run main.py build library/library.smi
 
-# Or using your own CSV file
-uv run scripts/build_index.py your_library.csv
+# Using your own CSV file
+uv run main.py build your_library.csv --output-dir artifacts
 ```
 
 **Input Formats:**
@@ -45,39 +45,25 @@ uv run scripts/build_index.py your_library.csv
 ### 2. Search for Similar Compounds
 
 ```bash
-# Basic search for top 5 similar compounds
-uv run scripts/nearest.py "CCO"
+# ECFP6 + Tanimoto similarity search (top 5 results)
+uv run main.py search "CCO"
 
 # Search for top 10 compounds
-uv run scripts/nearest.py "CCO" 10
-
-# Blended search using Mol2Vec (if you have a trained model)
-uv run scripts/nearest.py "CCO" 10 /path/to/mol2vec_model.pkl
-```
-
-### 3. Using the Main Interface
-
-```bash
-# Build index
-uv run main.py build library/library.smi
-
-# Search
 uv run main.py search "CCO" --top-k 10
-uv run main.py search "CCO" --top-k 10 --mol2vec-model /path/to/model.pkl
+
+# Blended ECFP6 + Mol2Vec search (if you have a trained model)
+uv run main.py search "CCO" --top-k 10 --mol2vec-model /path/to/mol2vec_model.pkl
 ```
 
 ## Project Structure
 
 ```
 closest_compound/
-├── main.py                 # Main CLI interface
-├── scripts/
-│   ├── build_index.py      # Index building script
-│   └── nearest.py          # Search script
+├── main.py                 # Main CLI interface for build/search
 ├── src/
-│   ├── index_builder.py    # Index building functions
-│   ├── query.py           # Search functions
-│   └── utils.py           # Utility functions
+│   ├── index_builder.py    # ECFP6 index building functions
+│   ├── query.py           # ECFP6 + Tanimoto and Mol2Vec search
+│   └── utils.py           # Molecular utility functions
 ├── library/
 │   └── library.smi        # Sample compound library
 └── artifacts/             # Generated indices (created after build)

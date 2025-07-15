@@ -30,15 +30,34 @@ def main():
     args = parser.parse_args()
     
     if args.command == 'build':
-        from scripts.build_index import main as build_main
-        sys.argv = ['build_index.py', args.input_file]
-        build_main()
+        from src.index_builder import build_ecfp6_index
+        from scripts.build_index import parse_smiles_file
+        import os
+        
+        input_path = args.input_file
+        if not os.path.exists(input_path):
+            print(f"Error: Input file not found: {input_path}")
+            sys.exit(1)
+        
+        print(f"Building index from: {input_path}")
+        
+        try:
+            if input_path.endswith('.smi'):
+                # Convert SMI to temporary CSV for processing
+                df = parse_smiles_file(input_path)
+                temp_csv = "temp_library.csv"
+                df.to_csv(temp_csv, index=False)
+                build_ecfp6_index(temp_csv, args.output_dir)
+                os.remove(temp_csv)  # Clean up
+            else:
+                build_ecfp6_index(input_path, args.output_dir)
+        except Exception as e:
+            print(f"Error building index: {e}")
+            sys.exit(1)
+            
     elif args.command == 'search':
-        from scripts.nearest import main as search_main
-        sys.argv = ['nearest.py', args.smiles, str(args.top_k)]
-        if args.mol2vec_model:
-            sys.argv.append(args.mol2vec_model)
-        search_main()
+        from src.query import search
+        search(args.smiles, args.top_k, args.mol2vec_model)
     else:
         parser.print_help()
 
