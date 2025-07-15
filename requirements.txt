@@ -1,0 +1,14 @@
+# Core dependencies for closest_compound
+faiss-cpu>=1.11.0
+rdkit>=2025.3.3
+numpy>=1.26,<1.28
+pandas<2
+scipy<1.12
+
+# Optional: for Mol2Vec functionality
+mol2vec>=0.2.2
+gensim>=4.3.2
+
+# Optional: for additional functionality
+requests>=2.32.4
+joblib>=1.3.0

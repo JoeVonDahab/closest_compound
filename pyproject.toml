@@ -1,0 +1,16 @@
+[project]
+name = "closest-compound"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "faiss-cpu>=1.11.0.post1",
+    "gensim>=4.3.2",
+    "mol2vec>=0.2.2",
+    "numpy>=1.26,<1.28",
+    "pandas<2",
+    "rdkit>=2025.3.3",
+    "requests>=2.32.4",
+    "scipy<1.12",
+]
