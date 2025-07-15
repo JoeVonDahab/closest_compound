@@ -40,7 +40,7 @@ uv run main.py build your_library.csv --output-dir artifacts
 
 **Input Formats:**
 - **CSV**: Must contain a `smiles` column and preferably a `drug_name` column
-- **SMI**: Tab-separated format with SMILES and compound names
+- **SMI**: Space-separated format with SMILES and compound names (e.g., "CCO Ethanol")
 
 ### 2. Search for Similar Compounds
 

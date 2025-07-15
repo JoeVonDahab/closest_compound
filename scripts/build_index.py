@@ -10,12 +10,18 @@ def parse_smiles_file(file_path):
             line = line.strip()
             if not line:
                 continue
-            parts = line.split('\t')
+            
+            # Split on whitespace - first part is SMILES, rest is compound name
+            parts = line.split(None, 1)  # Split on any whitespace, max 1 split
             if len(parts) >= 2:
                 smiles, name = parts[0], parts[1]
                 data.append({'smiles': smiles, 'drug_name': name})
+            elif len(parts) == 1:
+                # Only SMILES, no name
+                smiles = parts[0]
+                data.append({'smiles': smiles, 'drug_name': f'Compound_{line_num}'})
             else:
-                print(f"Warning: Skipping malformed line {line_num}: {line}")
+                print(f"Warning: Skipping empty line {line_num}")
     
     return pd.DataFrame(data)
 
@@ -30,8 +36,8 @@ if __name__ == "__main__":
             input_path = "data/library.csv"
         else:
             print("Error: No input file specified and no default file found.")
-            print("Usage: python build_index.py <input_file>")
-            print("Supported formats: .csv (with 'smiles' column) or .smi (SMILES<tab>Name)")
+            print("Usage: uv run build_index.py <input_file>")
+            print("Supported formats: .csv (with 'smiles' column) or .smi (SMILES Name)")
             sys.exit(1)
     
     if not os.path.exists(input_path):
