@@ -1,6 +1,40 @@
 # Closest Compound
 
-A molecular similarity search tool that provides two complementary approaches for finding chemically similar compounds: traditio## Search Method Comparison - What You Actually Get
+A molecular similarity search tool that provides two complementary approaches for finding chemically similar compounds: traditional ECFP6 fingerprints and modern Mol2Vec neural embeddings.
+
+## Installation
+
+```bash
+# Clone the repository (includes pre-trained Mol2Vec model)
+git clone https://github.com/JoeVonDahab/closest_compound.git
+cd closest_compound
+
+# Install dependencies using UV
+uv sync
+```
+
+## Quick Start
+
+### 1. Build Similarity Indices
+
+```bash
+# Option A: ECFP6 fingerprints only (structural similarity)
+uv run main.py build library/library.smi
+
+# Option B: Both ECFP6 + Mol2Vec (structural + semantic similarity)
+uv run main.py build library/library.smi --mol2vec-model models/model_300dim.pkl
+```
+
+### 2. Search for Similar Compounds
+
+```bash
+# ECFP6 only - finds structurally similar compounds
+uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O"
+
+# Blended search - finds both structurally and functionally similar compounds  
+uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O" --mol2vec-model models/model_300dim.pkl
+```
+## Difference between two methods: 
 
 ### ECFP6 Only: Structural Similarity
 Finds compounds with **similar chemical structures** - same scaffolds, functional groups, substructures.
@@ -47,124 +81,6 @@ Finds compounds that are **both structurally similar AND functionally/pharmacolo
 
 **Bottom Line:** ECFP6 = "compounds that look similar", Blended = "compounds that might work similarly"fingerprints and modern Mol2Vec neural embeddings.
 
-## Features
-
-### Two Search Approaches Available
-
-#### 1. ECFP6 + Tanimoto Similarity (Default)
-- **Fast and interpretable**: Classical molecular fingerprints based on circular substructures
-- **Structural similarity**: Excellent for finding compounds with similar scaffolds and functional groups
-- **Tanimoto scoring**: Well-established similarity metric (0-1 scale, 1 = identical)
-- **Always available**: Built-in method requiring no external models
-
-#### 2. Blended ECFP6 + Mol2Vec Search
-- **Combined ranking**: Uses BOTH ECFP6 fingerprints AND Mol2Vec neural embeddings
-- **Enhanced discovery**: Finds both structurally and semantically similar compounds
-- **Comprehensive results**: Merges rankings from both methods for better coverage
-- **Requires model**: Uses pre-trained model_300dim.pkl for the Mol2Vec component
-
-### Additional Features
-- **SMI Input Format**: Simple space-separated SMILES and compound names
-- **FAISS Backend**: Efficient similarity search using Facebook's FAISS library
-- **Python 3.9 + Gensim 3.8**: Optimized for compatibility
-
-## Installation
-
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd closest_compound
-
-# Install dependencies using UV
-uv sync
-
-# Or install in development mode
-uv pip install -e .
-```
-
-## Quick Start
-
-### 1. Download Mol2Vec Model (Optional)
-
-For neural embedding similarity, download the pre-trained model:
-
-```bash
-mkdir -p models
-wget https://github.com/samoturk/mol2vec/raw/master/examples/models/model_300dim.pkl -P models/
-```
-
-### 2. Build Similarity Indices
-
-Choose your approach based on your needs:
-
-```bash
-# Option A: ECFP6 fingerprints only (fast, structural similarity)
-uv run main.py build library/library.smi
-
-# Option B: Both ECFP6 + Mol2Vec (comprehensive, requires model download)
-uv run main.py build library/library.smi --mol2vec-model models/model_300dim.pkl
-
-# Custom library and output directory
-uv run main.py build your_library.smi --output-dir my_artifacts --mol2vec-model models/model_300dim.pkl
-```
-
-**What gets built:**
-- **ECFP6 index**: `artifacts/ecfp6.index` + `artifacts/meta.pkl` (always)
-- **Mol2Vec index**: `artifacts/mol2vec.index` (only with --mol2vec-model)
-
-### 3. Search for Similar Compounds
-
-Choose your search method:
-
-```bash
-# Method 1: ECFP6 + Tanimoto similarity only (structural similarity)
-uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O" --top-k 5
-
-# Method 2: Blended search - combines ECFP6 + Mol2Vec (structural + semantic)
-uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O" --mol2vec-model models/model_300dim.pkl --top-k 5
-
-# Search with more results
-uv run main.py search "CCO" --top-k 10
-```
-
-**How the search methods work:**
-- **Without `--mol2vec-model`**: Uses only ECFP6 fingerprints + Tanimoto similarity
-- **With `--mol2vec-model`**: Combines both ECFP6 and Mol2Vec rankings into a blended result
-
-## Input Format
-
-**SMI Files**: Space-separated format with SMILES and compound names
-```
-CC(=O)OC1=CC=CC=C1C(=O)O Aspirin
-CCO Ethanol
-CC(C)O Isopropanol
-```
-
-## Output Examples
-
-### ECFP6 + Tanimoto Search (Structural Similarity)
-```bash
-uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O" --top-k 3
-```
-```
- 1. Aspirin  |  CC(=O)OC1=CC=CC=C1C(=O)O  |  Tanimoto: 1.000
- 2. Salsalate  |  C1=CC=C(C(=C1)C(=O)OC2=CC=CC=C2C(=O)O)O  |  Tanimoto: 0.690
- 3. Fosfosal  |  C1=CC=C(C(=C1)C(=O)O)OP(=O)(O)O  |  Tanimoto: 0.635
-```
-
-### Blended ECFP6 + Mol2Vec Search (Structural + Semantic Similarity)
-```bash
-uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O" --mol2vec-model models/model_300dim.pkl --top-k 3
-```
-```
-✓ Blended ECFP6 + Mol2Vec:
- 1. Aspirin  |  CC(=O)OC1=CC=CC=C1C(=O)O
- 2. Indiplon  |  CC(=O)N(C)C1=CC=CC(=C1)C2=CC=NC3=C(C=NN23)C(=O)C4=CC=CS4
- 3. Salsalate  |  C1=CC=C(C(=C1)C(=O)OC2=CC=CC=C2C(=O)O)O
-```
-
-**Notice**: Blended search finds Indiplon (a sedative) which shares pharmacological properties with aspirin but has different structure - this demonstrates semantic similarity!
-
 ```
 closest_compound/
 ├── main.py                 # Main CLI interface for build/search
@@ -191,8 +107,6 @@ closest_compound/
 - **Gensim 3.8**: Word2Vec model compatibility for Mol2Vec
 - **NumPy**: Numerical operations
 
-## Search Method Comparison
-
 ## Technical Details
 
 ### ECFP6 Fingerprints
@@ -212,4 +126,5 @@ closest_compound/
 2. Search both FAISS indices independently  
 3. Combine and re-rank results using weighted scoring
 4. Return unified ranked list
+
 
