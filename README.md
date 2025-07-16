@@ -4,8 +4,8 @@ A molecular similarity search tool that provides two complementary approaches fo
 
 ## Installation
 
-Before starting, I use UV for environment building, its much faster than conda or pip. If you don't have UV, just refer to this link: https://docs.astral.sh/uv/getting-started/installation/
-
+* Before starting, I use UV for environment building; it's much faster than conda or pip. If you don't have UV, just refer to this link: https://docs.astral.sh/uv/getting-started/installation/
+* Once you have it, you can continue with the guide:
 ```bash
 # Clone the repository (includes pre-trained Mol2Vec model)
 git clone https://github.com/JoeVonDahab/closest_compound.git
