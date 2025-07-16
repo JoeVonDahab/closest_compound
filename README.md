@@ -4,6 +4,8 @@ A molecular similarity search tool that provides two complementary approaches fo
 
 ## Installation
 
+Before starting, I use UV for environment building, its much faster than conda or pip. If you don't have UV, just refer to this link: https://docs.astral.sh/uv/getting-started/installation/
+
 ```bash
 # Clone the repository (includes pre-trained Mol2Vec model)
 git clone https://github.com/JoeVonDahab/closest_compound.git
@@ -34,6 +36,7 @@ uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O"
 # Blended search - finds both structurally and functionally similar compounds  
 uv run main.py search "CC(=O)OC1=CC=CC=C1C(=O)O" --mol2vec-model models/model_300dim.pkl
 ```
+That's it!, that's all you need to run the models. For more details, you can continue reading.
 ## Difference between two methods: 
 
 ### ECFP6 Only: Structural Similarity
