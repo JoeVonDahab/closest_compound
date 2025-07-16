@@ -18,8 +18,9 @@ def main():
     
     # Build index command
     build_parser = subparsers.add_parser('build', help='Build similarity index')
-    build_parser.add_argument('input_file', help='Input file (.smi or .csv format)')
+    build_parser.add_argument('input_file', help='Input SMI file (SMILES compound_name format)')
     build_parser.add_argument('--output-dir', default='artifacts', help='Output directory')
+    build_parser.add_argument('--mol2vec-model', help='Path to Mol2Vec model to also build Mol2Vec index')
     
     # Search command
     search_parser = subparsers.add_parser('search', help='Search for similar compounds')
@@ -30,8 +31,7 @@ def main():
     args = parser.parse_args()
     
     if args.command == 'build':
-        from src.index_builder import build_ecfp6_index
-        from scripts.build_index import parse_smiles_file
+        from src.index_builder import build_ecfp6_index, build_mol2vec_index
         import os
         
         input_path = args.input_file
@@ -39,18 +39,25 @@ def main():
             print(f"Error: Input file not found: {input_path}")
             sys.exit(1)
         
+        if not input_path.endswith('.smi'):
+            print("Error: Only .smi files are supported")
+            print("Expected format: SMILES compound_name (space-separated)")
+            sys.exit(1)
+        
         print(f"Building index from: {input_path}")
         
         try:
-            if input_path.endswith('.smi'):
-                # Convert SMI to temporary CSV for processing
-                df = parse_smiles_file(input_path)
-                temp_csv = "temp_library.csv"
-                df.to_csv(temp_csv, index=False)
-                build_ecfp6_index(temp_csv, args.output_dir)
-                os.remove(temp_csv)  # Clean up
-            else:
-                build_ecfp6_index(input_path, args.output_dir)
+            # Build ECFP6 index
+            build_ecfp6_index(input_path, args.output_dir)
+            
+            # Build Mol2Vec index if model provided
+            if args.mol2vec_model:
+                if not os.path.exists(args.mol2vec_model):
+                    print(f"Warning: Mol2Vec model not found: {args.mol2vec_model}")
+                    print("Skipping Mol2Vec index building...")
+                else:
+                    build_mol2vec_index(input_path, args.mol2vec_model, args.output_dir)
+                
         except Exception as e:
             print(f"Error building index: {e}")
             sys.exit(1)

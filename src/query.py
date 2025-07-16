@@ -41,6 +41,7 @@ def search(query_smi, top_k, model_path=None):
                 return
                 
             model = word2vec.Word2Vec.load(model_path)
+            
             vec2 = DfVec(sentences2vec([mol2alt_sentence(Chem.MolFromSmiles(query_smi), 1)], model)).vec.astype("float32")
             faiss.normalize_L2(vec2.reshape(1, -1))
             index2 = faiss.read_index("artifacts/mol2vec.index")
